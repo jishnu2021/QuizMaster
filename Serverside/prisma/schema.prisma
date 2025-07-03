@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id       String    @id @default(uuid())
+  email    String    @unique
+  password String
+  role     Role      @default(USER)
+  attempts Attempt[]
+}
+
+model Quiz {
+  id        String     @id @default(uuid())
+  title     String
+  topic     String
+  questions Question[]
+  attempts  Attempt[]
+}
+
+model Question {
+  id        String   @id @default(uuid())
+  text      String
+  answerIdx Int
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id])
+  options   Option[]
+}
+
+model Option {
+  id         String   @id @default(uuid())
+  text       String
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id])
+}
+
+model Attempt {
+  id      String   @id @default(uuid())
+  userId  String
+  quizId  String
+  answers Json
+  score   Int
+  user    User     @relation(fields: [userId], references: [id])
+  quiz    Quiz     @relation(fields: [quizId], references: [id])
+}
